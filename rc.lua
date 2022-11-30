@@ -8,8 +8,8 @@ local beautiful = require'beautiful'
 local gears = require'gears'
 beautiful.init('/home/arthex/.config/awesome/theme.lua')
 
--- local tiitlebar = require 'modules.titlebar'
--- tiitlebar()
+local titlebar = require 'nice' 
+titlebar()
 
 -- load key and mouse bindings
 require'bindings'
