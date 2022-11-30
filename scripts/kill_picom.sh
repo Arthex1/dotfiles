@@ -1,0 +1,1 @@
+killall picom; picom --config /home/arthex/.config/awesome/picom.conf -b 
