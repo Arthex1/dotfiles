@@ -72,7 +72,7 @@ awful.keyboard.append_global_keybindings{
       key         = 'p',
       description = 'show the menubar',
       group       = 'launcher',
-      on_press    = function() menubar.show() end,
+      on_press    = function() awful.spawn("/home/arthex/.config/rofi/launchers/type-3/launcher.sh") end,
    },
 }
 
@@ -287,7 +287,7 @@ awful.keyboard.append_global_keybindings{
       end
    },
    awful.key{
-      modifiers   = {mod.super, mod.shift},
+      modifiers   = {mod.ctrl, mod.shift},
       keygroup    = 'numrow',
       description = 'move focused client to tag',
       group       = 'tag',

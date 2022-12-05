@@ -14,6 +14,7 @@ titlebar()
 -- load key and mouse bindings
 require'bindings'
 
+
 -- load rules
 require'rules'
 

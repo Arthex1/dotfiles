@@ -1,1 +1,2 @@
-killall picom; picom --config /home/arthex/.config/awesome/picom.conf -b 
+killall picom && sleep 1
+picom --config /home/arthex/.config/awesome/picom.conf -b 

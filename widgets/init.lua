@@ -8,7 +8,7 @@ local menubar = require 'menubar'
 local apps = require'config.apps'
 local mod = require'bindings.mod'
 local naughty = require 'naughty'
-
+local gears = require 'gears'
 _M.awesomemenu = {
    {'hotkeys', function() hotkeys_popup.show_help(nil, awful.screen.focused()) end},
    {'manual', apps.manual_cmd},
@@ -109,38 +109,187 @@ function _M.create_taglist(s)
       }
    }
 end
-
+local bling = require 'modules.bling' 
+beautiful.task_preview_widget_border_radius = 12   
+beautiful.task_preview_widget_bg = "#4c4f69" 
+-- icon_role, name_role, image_role  
+bling.widget.task_preview.enable {
+    x = 20,                    -- The x-coord of the popup
+    y = 20,                    -- The y-coord of the popup
+    height = 200,              -- The height of the popup
+    width = 200,               -- The width of the popup
+    placement_fn = function(c) -- Place the widget using awful.placement (this overrides x & y)
+        awful.placement.bottom(c, {
+            margins = {
+                bottom = 80
+            }
+        })
+    end,
+    -- Your widget will automatically conform to the given size due to a constraint container.
+    widget_structure = {
+        {
+            {
+                {
+                    id = 'icon_role',
+                    widget = awful.widget.clienticon, -- The client icon
+                },
+                {
+                    id = 'name_role', -- The client name / title
+                    widget = wibox.widget.textbox,
+                },
+                layout = wibox.layout.flex.horizontal
+            },
+            widget = wibox.container.margin,
+            margins = 5
+        },
+        {
+         widget = wibox.container.margin,
+         margins = 50,
+         {
+            id = 'image_role', -- The client preview
+            resize = true,
+            valign = 'center',
+            halign = 'center',
+            widget = wibox.widget.imagebox,
+        }},
+        layout = wibox.layout.fixed.vertical
+    }
+}
+beautiful.tasklist_bg_minimize = "#ff0000"
 function _M.create_tasklist(s)
-   return awful.widget.tasklist{
-      screen = s,
-      filter = awful.widget.tasklist.filter.currenttags,
-      buttons = {
-         awful.button{
-            modifiers = {},
-            button    = 1,
-            on_press  = function(c)
-               c:activate{context = 'tasklist', action = 'toggle_minimization'}
-            end,
-         },
-         awful.button{
-            modifiers = {},
-            button    = 3,
-            on_press  = function() awful.menu.client_list{theme = {width = 250}}   end,
-         },
-         awful.button{
-            modifiers = {},
-            button    = 4,
-            on_press  = function() awful.client.focus.byidx(-1) end
-         },
-         awful.button{
-            modifiers = {},
-            button    = 5,
-            on_press  = function() awful.client.focus.byidx(1) end
-         },
-      }
-   }
-end
+   return awful.widget.tasklist {
+    screen   = s,
+    filter   = awful.widget.tasklist.filter.alltags,
+    buttons  = {
+      awful.button({}, 1, function(c)
+         if not c.active then
+            c:activate {
+               context		= "task_bar",
+               switch_to_tag	= true,
+            }
 
+         else 
+            c.minimized = true
+
+         end
+
+         
+      end)
+    },
+    layout   = {
+      pacing_widget = {
+            {
+                forced_width  = 5,
+                forced_height = 24,
+                thickness     = 1,
+                color         = '#777777',
+                widget        = wibox.widget.separator
+            },
+            valign = 'center',
+            halign = 'center',
+            widget = wibox.container.place,
+        },
+        spacing = 1,
+        layout  = wibox.layout.fixed.horizontal
+    },
+    widget_template = {
+      -- background_role, clienticon, 
+     
+      
+      {
+      widget = wibox.container.margin,
+      left = 3,
+      right = 3,  
+      {
+         widget = wibox.container.place,
+         halign = 'center',
+         valign = 'top',
+
+         {
+            widget = wibox.container.background,
+            id = 'zombie',
+            shape = function(cr, w, h)
+               gears.shape.rounded_rect(cr, w, h, 20)
+
+               
+            end,
+            forced_height = 40,
+            forced_width = 40,
+            bg = "#e5e9f066",
+            {
+
+         
+               
+            {
+               
+               widget = awful.widget.clienticon,
+               id = 'clienticon',
+               forced_height = 25,
+               forced_width = 25
+            },
+            widget = wibox.container.place,
+            halign = 'center',
+            valign = 'center'
+         }
+            
+         },
+         
+      }},
+      {
+            
+            wibox.widget.base.make_widget(),
+            forced_height = 3,
+            id            = 'background_role',
+            widget        = wibox.container.background,
+      },
+      
+      --    {
+      --       wibox.widget.base.make_widget(),
+      --       forced_height = 5,
+      --       id            = 'background_role',
+      --       widget        = wibox.container.background,
+      --   },
+      --   {
+      --    widget = wibox.container.background,
+      --    id = "bgling",
+      --    forced_height = 60,
+      --    forced_width = 60,
+      --    {
+      --       {
+      --           id     = 'clienticon',
+            
+      --           widget = awful.widget.clienticon,
+      --       },
+      --       margins = 5,
+      --       widget  = wibox.container.margin
+      --   }},
+        
+        nil,
+        create_callback = function(self, c, index, objects) --luacheck: no unused args
+            self:get_children_by_id('clienticon')[1].client = c
+            
+            
+            
+            -- BLING: Toggle the popup on hover and disable it off hover
+            self:connect_signal('mouse::enter', function(ns)
+                    self:get_children_by_id('zombie')[1].bg = "#e5e9f0cc"  
+                    awesome.emit_signal("bling::task_preview::visibility", s,
+                                        true, c)
+                              
+
+                end)
+                self:connect_signal('mouse::leave', function(ns)
+                    self:get_children_by_id('zombie')[1].bg = "#e5e9f066"
+                    awesome.emit_signal("bling::task_preview::visibility", s,
+                                        false, c)
+                    
+                end)
+        end,
+        layout = wibox.layout.align.vertical,
+    },
+}
+
+end
 function _M.create_wibox(s)
    local launcher = wibox.widget{
       widget = wibox.container.background, 
@@ -181,33 +330,32 @@ function _M.create_wibox(s)
    return awful.wibar{
       screen = s,
       height = 50,
-      ontop = true,
+      ontop = false,
       position = 'bottom',
       bg = "#292c3c8c",
       widget = {
          layout = wibox.layout.align.horizontal,
+      
          {
+          
           layout = wibox.layout.flex.horizontal, 
           launcher,
+         
           
          },
          {
             layout = wibox.layout.flex.horizontal, 
+            wibox.widget{
+               widget = wibox.container.place,
+               halign = 'center',
+               s.tasklist
+            }
+            
          },
          {
             layout = wibox.layout.flex.horizontal,
            
          },
-
-
-         -- left widgets
-         -- {
-         --    layout = wibox.layout.fixed.horizontal,
-         --    _M.launcher,
-         --    s.taglist,
-         --    s.promptbox,
-         -- },
-         -- middle widgets
        
          -- right widgets
       --    {
@@ -220,5 +368,10 @@ function _M.create_wibox(s)
        }
    }
 end
+local desktopapps = require("freedesktop")
+for s in screen do
+   desktopapps.desktop.add_icons({screen = s}) 
+end
 
 return _M
+
