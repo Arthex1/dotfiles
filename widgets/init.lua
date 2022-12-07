@@ -368,10 +368,8 @@ function _M.create_wibox(s)
        }
    }
 end
-local desktopapps = require("freedesktop")
-for s in screen do
-   desktopapps.desktop.add_icons({screen = s}) 
-end
+
+local drtv = require ('drth')
 
 return _M
 

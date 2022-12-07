@@ -8,8 +8,6 @@ local beautiful = require'beautiful'
 local gears = require'gears'
 beautiful.init('/home/arthex/.config/awesome/theme.lua')
 
-local titlebar = require 'nice' 
-titlebar()
 
 -- load key and mouse bindings
 require'bindings'
@@ -23,3 +21,9 @@ require'signals'
 
 -- load autostart move 
 require 'autostart'
+
+local titlebar = require 'nice'
+
+
+titlebar()
+
