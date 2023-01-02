@@ -9,6 +9,8 @@ local apps = require'config.apps'
 local mod = require'bindings.mod'
 local naughty = require 'naughty'
 local gears = require 'gears'
+local Gio = require 'lgi'.Gio
+local pinmanager = require 'widgets.pinmanager'
 _M.awesomemenu = {
    {'hotkeys', function() hotkeys_popup.show_help(nil, awful.screen.focused()) end},
    {'manual', apps.manual_cmd},
@@ -17,18 +19,8 @@ _M.awesomemenu = {
    {'quit', awesome.quit},
 }
 
-_M.mainmenu = awful.menu{
-   items = {
-      {'awesome', _M.awesomemenu, beautiful.awesome_icon},
-      {'open terminal', apps.terminal}
-   }
-}
 
-_M.launcher = awful.widget.launcher{
-   image = beautiful.awesome_icon,
-   menu = _M.mainmenu
-}
-
+beautiful.main_menu_bg = "#2e3440"
 _M.keyboardlayout = awful.widget.keyboardlayout()
 _M.textclock      = wibox.widget.textclock()
 
@@ -155,23 +147,147 @@ bling.widget.task_preview.enable {
         layout = wibox.layout.fixed.vertical
     }
 }
-beautiful.tasklist_bg_minimize = "#ff0000"
+beautiful.tasklist_bg_minimize = "#d20f39"
+beautiful.tasklist_bg_focus = "#209fb5"
+beautiful.tasklist_bg_normal = "#626880"
+beautiful.transparent_bg = "#e5e9f066"
+local icon_helper = require('modules.bling.helpers.icon_theme')("Mint-Y", 48)
+
+_M.menuforge = require 'yoru-menu.menu'
+
+local function create_pinnned_menu(cname, exec, widget) 
+   
+      local ssh = _M.menuforge({
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "},
+            text = "Open Application", 
+            on_press = function()
+               Gio.AppInfo.launch_uris_async(Gio.AppInfo.create_from_commandline(exec, nil, 0))
+               
+            end
+         }),
+         
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "},
+            text = "Open App Settings", 
+            on_press = function()
+
+            end
+         }),
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "}, 
+            text  = "Remove app from taskbar",
+            on_press = function()
+                _M.pinned_apps:remove_widgets(widget)                
+                pinmanager.RemoveApp(cname)
+               
+            end
+         }),
+      })
+      return ssh
+   	
+end
+
+local function create_menu(c) 
+   
+      local ssh = _M.menuforge({
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "},
+            text = "Close Application", 
+            on_press = function()
+               c:kill()
+               
+            end
+         }),
+         
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "},
+            text = "Minimize/Unminimize Application", 
+            on_press = function()
+               c.minimized = not c.minimized
+               
+            end
+         }),
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "},
+            text = "Open App Settings", 
+            on_press = function()
+               
+            end
+         }),
+      })
+   	return _M.menuforge({
+         _M.menuforge.button({
+            icon = {icon = "", font = "Material Icons Round "}, 
+            text  = "Pin app to taskbar",
+            on_press = function()
+              
+               pinmanager.AddApp(c.class, icon_helper:get_client_icon_path(c), true) 
+               
+            end
+         }),
+
+   
+         _M.menuforge.sub_menu_button({
+            icon = {icon = "", font = "Material Icons Round "},
+            text = "Application", 
+            sub_menu = ssh
+         })
+      })
+end
+
+function _M.pinned_template(icon) 
+      return wibox.widget{
+         widget = wibox.container.place, 
+         valign = 'top',   
+         {
+            widget = wibox.container.margin,
+            left = 0,
+            right = 0,
+            top = beautiful.dpi(1.2),
+            bottom = beautiful.dpi(3.4),  
+      
+         {
+            widget = wibox.container.background,
+            
+            forced_width = beautiful.dpi(30),
+            forced_height = beautiful.dpi(30),
+            shape = function(cr, w, h)
+               gears.shape.rounded_rect(cr, w, h, 7)
+               
+            end,
+            id = "bgdis",
+            -- {
+            --  widget = wibox.container.place,
+            --  halign = 'center',
+            --  valign = 'center',
+               {
+            
+                  widget = wibox.widget.imagebox,
+                  id = 'clienticon',
+                  image = icon,
+                  forced_height = beautiful.dpi(30),
+                  forced_width = beautiful.dpi(30)
+               }
+            -- }
+         }
+         
+      
+      }}
+   
+end
+
 function _M.create_tasklist(s)
    return awful.widget.tasklist {
     screen   = s,
+    style = {
+      
+        
+    },
     filter   = awful.widget.tasklist.filter.alltags,
     buttons  = {
       awful.button({}, 1, function(c)
-         if not c.active then
-            c:activate {
-               context		= "task_bar",
-               switch_to_tag	= true,
-            }
-
-         else 
-            c.minimized = true
-
-         end
+        
 
          
       end)
@@ -179,8 +295,8 @@ function _M.create_tasklist(s)
     layout   = {
       pacing_widget = {
             {
-                forced_width  = 5,
-                forced_height = 24,
+                forced_width  = beautiful.dpi(2.4),
+                forced_height = beautiful.dpi(10),
                 thickness     = 1,
                 color         = '#777777',
                 widget        = wibox.widget.separator
@@ -189,119 +305,147 @@ function _M.create_tasklist(s)
             halign = 'center',
             widget = wibox.container.place,
         },
-        spacing = 1,
+        spacing = beautiful.dpi(7),
         layout  = wibox.layout.fixed.horizontal
     },
     widget_template = {
       -- background_role, clienticon, 
-     
       
+       {
+         widget = wibox.container.place, 
+         valign = 'top',   
       {
-      widget = wibox.container.margin,
-      left = 3,
-      right = 3,  
-      {
-         widget = wibox.container.place,
-         halign = 'center',
-         valign = 'top',
-
+         widget = wibox.container.margin,
+         left = 0,
+         right = 0,
+         top = beautiful.dpi(1.2),
+         bottom = beautiful.dpi(3.4),  
+      
          {
             widget = wibox.container.background,
-            id = 'zombie',
+            
+            forced_width = beautiful.dpi(30),
+            forced_height = beautiful.dpi(30),
             shape = function(cr, w, h)
-               gears.shape.rounded_rect(cr, w, h, 20)
-
+               gears.shape.rounded_rect(cr, w, h, 7)
                
             end,
-            forced_height = 40,
-            forced_width = 40,
-            bg = "#e5e9f066",
-            {
-
-         
-               
-            {
-               
-               widget = awful.widget.clienticon,
-               id = 'clienticon',
-               forced_height = 25,
-               forced_width = 25
-            },
-            widget = wibox.container.place,
-            halign = 'center',
-            valign = 'center'
-         }
+            id = "bgling",
+            -- {
+            --  widget = wibox.container.place,
+            --  halign = 'center',
+            --  valign = 'center',
+               {
             
-         },
+                  widget = wibox.widget.imagebox,
+                  id = 'clienticon',
+                  forced_height = beautiful.dpi(30),
+                  forced_width = beautiful.dpi(30)
+               }
+            -- }
+         }
          
+      
       }},
+   
       {
+         widget = wibox.container.margin,
+         left = 0,
+         right = 0 ,
+         bottom = 0,
+         id = "eee",
+   
+         {
             
             wibox.widget.base.make_widget(),
-            forced_height = 3,
+            forced_height = beautiful.dpi(  2.4),
+            forced_width = beautiful.dpi(35),
+            
             id            = 'background_role',
             widget        = wibox.container.background,
+         }
       },
       
-      --    {
-      --       wibox.widget.base.make_widget(),
-      --       forced_height = 5,
-      --       id            = 'background_role',
-      --       widget        = wibox.container.background,
-      --   },
-      --   {
-      --    widget = wibox.container.background,
-      --    id = "bgling",
-      --    forced_height = 60,
-      --    forced_width = 60,
-      --    {
-      --       {
-      --           id     = 'clienticon',
-            
-      --           widget = awful.widget.clienticon,
-      --       },
-      --       margins = 5,
-      --       widget  = wibox.container.margin
-      --   }},
-        
         nil,
         create_callback = function(self, c, index, objects) --luacheck: no unused args
-            self:get_children_by_id('clienticon')[1].client = c
+            
+            self:buttons{
+               awful.button({}, 3, function()
+                  local l  = create_menu(c)
+                  l:toggle({
+                     wibox = s.wibox, 
+                     offset = {y = -100}
+                  })
+                  
+                  end
+      
+               ),
+               awful.button({}, 1, function()
+                   if not c.active then
+                     c:activate {
+                        context		= "task_bar",
+                        switch_to_tag	= true,
+                     }
+
+         else 
+            c.minimized = true
+
+         end
+               end)
+            }
+            self:get_children_by_id('clienticon')[1].image = icon_helper:get_client_icon_path(c) 
             
             
-            
+            self:connect_signal("mouse::enter", function()
+               
+               if not c.active then 
+                  self:get_children_by_id("bgling")[1].bg = beautiful.transparent_bg
+               else 
+                  self:get_children_by_id("bgling")[1].bg = "#e64553ab"
+               end 
+            end)
+            self:connect_signal("mouse::leave", function()
+               self:get_children_by_id("bgling")[1].bg = ""
+               
+            end)
+           
             -- BLING: Toggle the popup on hover and disable it off hover
-            self:connect_signal('mouse::enter', function(ns)
-                    self:get_children_by_id('zombie')[1].bg = "#e5e9f0cc"  
-                    awesome.emit_signal("bling::task_preview::visibility", s,
-                                        true, c)
+            -- self:connect_signal('mouse::enter', function(ns)
+            --         self:get_children_by_id('zombie')[1].bg = "#e5e9f0cc"  
+            --         awesome.emit_signal("bling::task_preview::visibility", s,
+            --                             true, c)
                               
 
-                end)
-                self:connect_signal('mouse::leave', function(ns)
-                    self:get_children_by_id('zombie')[1].bg = "#e5e9f066"
-                    awesome.emit_signal("bling::task_preview::visibility", s,
-                                        false, c)
+            --     end)
+            --     self:connect_signal('mouse::leave', function(ns)
+            --         self:get_children_by_id('zombie')[1].bg = "#e5e9f066"
+            --         awesome.emit_signal("bling::task_preview::visibility", s,
+            --                             false, c)
                     
-                end)
+            --     end)
         end,
         layout = wibox.layout.align.vertical,
     },
 }
 
+
 end
+
+_M.pinned_apps = wibox.layout{ layout = wibox.layout.flex.horizontal, spacing = beautiful.dpi(7)} 
+
+
 function _M.create_wibox(s)
    local launcher = wibox.widget{
       widget = wibox.container.background, 
       -- bg = "#e5e9f066", 
-      forced_width = 60,
+      forced_width = beautiful.dpi(52),
       wibox.widget{
             widget = wibox.container.place,
             wibox.widget{
                widget = wibox.widget.imagebox, 
                -- resize = true,
-               forced_height = 33,
-               forced_width = 33,
+               forced_height = beautiful.dpi(25),
+               forced_width = beautiful.dpi(25),
                image = "/home/arthex/.config/awesome/icons/arch.png"
             }  
       },
@@ -317,7 +461,8 @@ function _M.create_wibox(s)
    end)
    launcher:buttons{
       awful.button({}, 1, function()
-         awful.spawn("/home/arthex/.config/rofi/launchers/type-3/launcher.sh")
+         screen.emit_signal("toggle::launcher")
+         -- awful.spawn("/home/arthex/.config/rofi/launchers/type-3/launcher.sh")
 
          
       end),
@@ -326,10 +471,11 @@ function _M.create_wibox(s)
          
       end)
    }
-
-   return awful.wibar{
+   
+    
+   local wib =awful.wibar{
       screen = s,
-      height = 50,
+      height = beautiful.dpi(40),
       ontop = false,
       position = 'bottom',
       bg = "#292c3c8c",
@@ -345,16 +491,24 @@ function _M.create_wibox(s)
          },
          {
             layout = wibox.layout.flex.horizontal, 
+            spacing = 0,
+            wibox.widget {
+               widget = wibox.container.place, 
+                  
+                  _M.pinned_apps
+               
+            },
+           
             wibox.widget{
+              
                widget = wibox.container.place,
-               halign = 'center',
-               s.tasklist
+               s.tasklist, 
             }
-            
+           
          },
          {
             layout = wibox.layout.flex.horizontal,
-           
+            
          },
        
          -- right widgets
@@ -367,9 +521,68 @@ function _M.create_wibox(s)
       --    }
        }
    }
+   awesome.connect_signal('pin::add', function(cname, icon, exec, d) 
+      local p = _M.pinned_template(icon) 
+   
+      p:connect_signal('mouse::enter', function() 
+         p:get_children_by_id('bgdis')[1].bg = beautiful.transparent_bg
+      end)
+      p:connect_signal('mouse::leave', function() 
+         p:get_children_by_id('bgdis')[1].bg = ""   
+      
+      end) 
+      
+      
+      p:buttons{
+         awful.button({}, 1, function()
+            Gio.AppInfo.launch_uris_async(Gio.AppInfo.create_from_commandline(exec, nil, 0))
+         end),
+         awful.button({}, 3, function()
+            local pop = create_pinnned_menu(cname, exec, p)
+            pop:toggle({
+               wibox = wib, 
+               offset = {y = - 200}
+            })
+         end)
+      }
+      if not d then 
+         _M.pinned_apps:add(p)
+      end
+      client.connect_signal('manage', function(c)
+         if c.class == nil then 
+            return 
+         end 
+         if string.lower(c.class)  == string.lower(cname) then
+            _M.pinned_apps:remove_widgets(p)
+         end
+         
+      end)
+      client.connect_signal('unmanage', function(c)
+        local  n = false
+         if string.lower(c.class) == nil then 
+            return 
+         end 
+         if string.lower(c.class) == string.lower(cname) then
+            naughty.notify({text = c.class, title = cname})
+            for i, v in ipairs(client.get(s)) do 
+               if string.lower(v.class) == string.lower(cname) then
+                  n = true
+               end
+               
+            end
+            if not n then
+               _M.pinned_apps:add(p)
+            end
+         end
+         
+      end)
+   
+   end)
+   return wib
 end
 
 local drtv = require ('drth')
-
+_M.launcher = require 'widgets.launcher'
+_M.tagswitcher = require 'widgets.tagswitcher'
 return _M
 

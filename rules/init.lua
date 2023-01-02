@@ -11,7 +11,7 @@ ruled.client.connect_signal('request::rules', function()
          raise     = true,
          screen    = awful.screen.preferred,
          placement = awful.placement.no_overlap + awful.placement.no_offscreen,
-         border_width = 2,
+         border_width = 0,
       }
    }
 

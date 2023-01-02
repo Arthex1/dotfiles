@@ -106,6 +106,16 @@ awful.keyboard.append_global_keybindings{
       on_press    = awful.tag.viewnext,
    },
    awful.key{
+      modifiers = {mod.super},
+      key = 'j', 
+      description = 'Enable tag switcher', 
+      group = 'tag', 
+      on_press = function()
+         screen.emit_signal("toggle::switcher")
+         
+      end
+   },
+   awful.key{
       modifiers   = {mod.super},
       key         = 'Escape',
       description = 'go back',

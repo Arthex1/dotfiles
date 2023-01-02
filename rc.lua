@@ -12,7 +12,6 @@ beautiful.init('/home/arthex/.config/awesome/theme.lua')
 -- load key and mouse bindings
 require'bindings'
 
-
 -- load rules
 require'rules'
 
@@ -24,6 +23,5 @@ require 'autostart'
 
 local titlebar = require 'nice'
 
-
-titlebar()
+titlebar() 
 
