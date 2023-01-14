@@ -10,8 +10,7 @@ ruled.client.connect_signal('request::rules', function()
          focus     = awful.client.focus.filter,
          raise     = true,
          screen    = awful.screen.preferred,
-         placement = awful.placement.no_overlap + awful.placement.no_offscreen,
-         border_width = 0,
+         placement = awful.placement.no_overlap + awful.placement.no_offscreen
       }
    }
 
@@ -20,10 +19,7 @@ ruled.client.connect_signal('request::rules', function()
       id = 'floating',
       rule_any = {
          instance = {'copyq', 'pinentry'},
-         class = {   -- ruled.client.append_rule{
-            --    rule = {class = "kitty"},
-            --    properties = {border_width = 2.7}
-            -- }
+         class = {
             'Arandr',
             'Blueman-manager',
             'Gpick',
@@ -52,13 +48,8 @@ ruled.client.connect_signal('request::rules', function()
    ruled.client.append_rule{
       id         = 'titlebars',
       rule_any   = {type = {'normal', 'dialog'}},
-      properties = {titlebars_enabled = true,},
+      properties = {titlebars_enabled = true},
    }
-   -- ruled.client.append_rule{
-   --    rule = {class = "kitty"},
-   --    properties = {border_width = 2.7}
-   -- }
-
 
    -- Set Firefox to always map on the tag named '2' on screen 1.
    -- ruled.client.append_rule {

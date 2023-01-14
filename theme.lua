@@ -1,9 +1,7 @@
----------------------------
--- Default awesome theme --
----------------------------
 
 local theme_assets = require("beautiful.theme_assets")
 local xresources = require("beautiful.xresources")
+local rnotification = require("ruled.notification")
 local dpi = xresources.apply_dpi
 
 local gfs = require("gears.filesystem")
@@ -13,25 +11,63 @@ local theme = {}
 theme.dpi = dpi
 theme.font          = "sans 8"
 
-theme.bg_normal     = "#222222"
+
+-- Resize test 
+theme.snap_bg = "#fff555"
+
+-- Restart Slider
+theme.restart_loader_bg = "#2e3440"
+theme.restart_loader_slider_bg = "#d8dee9"
+theme.restart_loader_slider_fg = "#4c566a"
+
+-- Settings 
+theme.settings_file_path ="/home/arthex/.config/awesome/data/settings.json"
+theme.pinned_file_path = "/home/arthex/.config/awesome/data/pinned.json"
+-- Systray 
+theme.systray_size = dpi(27)
+
+-- Taskbar 
+theme.taskbar_height = dpi(45.6) -- 38
+theme.taskbar_bg = '#282a36'
+
+-- Custom Colors ( Global )
+theme.transparent_bg =  "#eceff435"-- "#e5e9f0331"
+
+-- Tasklist 
+theme.tasklist_bg_normal = "#fff555"
+theme.tasklist_bg_focus = "#fff555"
+theme.tasklist_bg_height = dpi(36) -- 30 -- 58.5
+theme.tasklist_bg_width = dpi(48) -- 40 -- 52
+theme.tasklist_bg_ind_height = dpi(43.7) --35.6 -- 46.2 -- Increase to Decrease size, and vice versa. This is because the indicator is stacked upon the background within the background
+theme.tasklist_icon_width = dpi(29) --  23 -- 29.9
+theme.tasklist_icon_height = dpi(29) -- 23 -- 29.9
+theme.tasklist_icon_theme = 'Adwaita'
+theme.tasklist_icon_size = 64
+theme.tasklist_hover_color = theme.transparent_bg
+theme.tasklist_active_hover_color = theme.transparent_bg
+theme.tasklist_spacing = dpi(8.4) -- 7
+theme.tasklist_hover_tooltip_bg = nil 
+theme.tasklist_hover_animation_duration = 0.02
+theme.tasklist_pinned_spacing = dpi(3)
+theme.tasklist_pinned_bottom_margin = dpi(0.2)
+
+theme.bg_normal     = "#2222228"
 theme.bg_focus      = "#535d6c"
-theme.helpers = require 'helpers'
 theme.bg_urgent     = "#ff0000"
 theme.bg_minimize   = "#444444"
 theme.bg_systray    = theme.bg_normal
 
 theme.fg_normal     = "#aaaaaa"
 theme.fg_focus      = "#ffffff"
-theme.icon_theme = "Colloid-dark"
 theme.fg_urgent     = "#ffffff"
 theme.fg_minimize   = "#ffffff"
 
-theme.useless_gap   = dpi(10)
-theme.border_width  = dpi(0)
-theme.border_normal = "#000000"
-theme.border_focus  = "#535d6c"
-theme.border_marked = "#91231c"
- 
+theme.useless_gap         = dpi(0)
+theme.border_width        = dpi(0)
+theme.border_color_normal = "#000000"
+theme.border_color_active = "#535d6c"
+theme.border_color_marked = "#91231c"
+
 -- There are other variable sets
 -- overriding the default one when
 -- defined, the sets are:
@@ -39,7 +75,6 @@ theme.border_marked = "#91231c"
 -- tasklist_[bg|fg]_[focus|urgent]
 -- titlebar_[bg|fg]_[normal|focus]
 -- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
--- mouse_finder_[color|timeout|animate_timeout|radius|factor]
 -- prompt_[fg|bg|fg_cursor|bg_cursor|font]
 -- hotkeys_[bg|fg|border_width|border_color|shape|opacity|modifiers_fg|label_bg|label_fg|group_margin|font|description_font]
 -- Example:
@@ -99,7 +134,7 @@ theme.titlebar_maximized_button_focus_inactive  = themes_path.."default/titlebar
 theme.titlebar_maximized_button_normal_active = themes_path.."default/titlebar/maximized_normal_active.png"
 theme.titlebar_maximized_button_focus_active  = themes_path.."default/titlebar/maximized_focus_active.png"
 
-theme.wallpaper = "/home/arthex/.config/awesome/wallpapers/black.png"
+theme.wallpaper = themes_path.."default/background.png"
 
 -- You can use your own layout icons like this:
 theme.layout_fairh = themes_path.."default/layouts/fairhw.png"
@@ -127,6 +162,14 @@ theme.awesome_icon = theme_assets.awesome_icon(
 -- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.
 theme.icon_theme = nil
+
+-- Set different colors for urgent notifications.
+rnotification.connect_signal('request::rules', function()
+    rnotification.append_rule {
+        rule       = { urgency = 'critical' },
+        properties = { bg = '#ff0000', fg = '#ffffff' }
+    }
+end)
 
 return theme
 

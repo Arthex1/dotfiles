@@ -26,7 +26,7 @@ awful.keyboard.append_global_keybindings{
       on_press    = function() widgets.mainmenu:show() end,
    },
    awful.key{
-      modifiers   = {mod.super, mod.ctrl},
+      modifiers   = {mod.ctrl, mod.shift},
       key         = 'r',
       description = 'reload awesome',
       group       = 'awesome',
@@ -72,21 +72,8 @@ awful.keyboard.append_global_keybindings{
       key         = 'p',
       description = 'show the menubar',
       group       = 'launcher',
-      on_press    = function() awful.spawn("/home/arthex/.config/rofi/launchers/type-3/launcher.sh") end,
+      on_press    = function() menubar.show() end,
    },
-}
-
-awful.keyboard.append_global_keybindings{
-   awful.key{
-      modifiers = {mod.super},
-      key = "k",
-      group = "screenshot", 
-      description = "Take Screenshot", 
-      on_press = function()
-         awful.spawn.with_shell("flameshot gui")
-         
-      end
-   }
 }
 
 -- tags related keybindings
@@ -106,37 +93,12 @@ awful.keyboard.append_global_keybindings{
       on_press    = awful.tag.viewnext,
    },
    awful.key{
-      modifiers = {mod.super},
-      key = 'j', 
-      description = 'Enable tag switcher', 
-      group = 'tag', 
-      on_press = function()
-         screen.emit_signal("toggle::switcher")
-         
-      end
-   },
-   awful.key{
       modifiers   = {mod.super},
       key         = 'Escape',
       description = 'go back',
       group       = 'tag',
       on_press    = awful.tag.history.restore,
    },
-   awful.key{
-      modifiers = {mod.ctrl},
-      keygroup = "numrow", 
-      group = "tag",
-      description = "change tag",
-      on_press = function(index)
-          local screen = awful.screen.focused()
-          local tag = screen.tags[index]
-          if tag then
-            tag:view_only()
-          end
-         
-      end
-
-   }
 }
 
 -- focus related keybindings
@@ -297,7 +259,7 @@ awful.keyboard.append_global_keybindings{
       end
    },
    awful.key{
-      modifiers   = {mod.ctrl, mod.shift},
+      modifiers   = {mod.super, mod.shift},
       keygroup    = 'numrow',
       description = 'move focused client to tag',
       group       = 'tag',
@@ -336,4 +298,19 @@ awful.keyboard.append_global_keybindings{
          end
       end
    },
+   awful.key{
+      modifiers = {mod.ctrl}, 
+      keygroup = 'numrow', 
+      description = 'Change tag', 
+      group = 'tag', 
+      on_press = function(index)
+         local screen = awful.screen.focused()
+          local tag = screen.tags[index]
+          if tag then
+            tag:view_only()
+          end
+
+         
+      end
+   }
 }

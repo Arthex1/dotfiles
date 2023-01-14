@@ -13,11 +13,10 @@ client.connect_signal('request::default_keybindings', function()
             c.fullscreen = not c.fullscreen
             c:raise()
          end,
-      }, 
-       
+      },
       awful.key{
          modifiers   = {mod.super, mod.shift},
-         key         = 'q',
+         key         = 'c',
          description = 'close',
          group       = 'client',
          on_press    = function(c) c:kill() end,
